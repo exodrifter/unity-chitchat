@@ -1,0 +1,3 @@
+[submodule "Rumor"]
+	path = Rumor
+	url = https://github.com/exodrifter/unity-rumor.git
