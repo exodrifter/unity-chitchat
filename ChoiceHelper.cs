@@ -6,9 +6,14 @@ using UnityEngine.UI;
 
 namespace Exodrifter.ChitChat
 {
-	[AddComponentMenu("Chit Chat/Choice Helper")]
+	[AddComponentMenu("")]
 	public class ChoiceHelper : MonoBehaviour
 	{
+		public GameObject Prefab
+		{
+			get { return prefab; }
+			set { prefab = value; }
+		}
 		[SerializeField]
 		private GameObject prefab;
 

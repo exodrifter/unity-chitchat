@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Exodrifter.ChitChat
 {
-	[AddComponentMenu("Chit Chat/Audio Helper")]
+	[AddComponentMenu("")]
 	public class AudioHelper : MonoBehaviour
 	{
 		private List<AudioSource> loops;

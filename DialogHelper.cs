@@ -5,13 +5,18 @@ using UnityEngine.UI;
 
 namespace Exodrifter.ChitChat
 {
-	[AddComponentMenu("Chit Chat/Dialog Helper")]
+	[AddComponentMenu("")]
 	public class DialogHelper : MonoBehaviour
 	{
+		public Text Text
+		{
+			get { return text; }
+			set { text = value; }
+		}
 		[SerializeField]
 		private Text text;
 
-		private void Show(string text)
+		public void Show(string text)
 		{
 			this.text.text = text;
 		}

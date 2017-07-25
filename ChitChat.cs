@@ -1,55 +1,55 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Exodrifter.Rumor.Lang;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Exodrifter.ChitChat
 {
-	[AddComponentMenu("Chit Chat/Chit Chat")]
+	[AddComponentMenu("")]
 	public class ChitChat : MonoBehaviour
 	{
+		public DialogHelper Dialog
+		{
+			get { return dialog; }
+		}
 		[SerializeField]
 		private DialogHelper dialog;
+
+		public ChoiceHelper Choice
+		{
+			get { return choice; }
+		}
 		[SerializeField]
 		private ChoiceHelper choice;
+
+		public AudioHelper Audio
+		{
+			get { return audio; }
+		}
 		[SerializeField]
 		private new AudioHelper audio;
 
 		private Rumor.Engine.Rumor rumor;
 		private bool exiting;
 
-		private static ChitChat instance;
-		private const string CHIT_CHAT_SCENE = "ChitChatScene";
-
-		void Awake()
+		void Start()
 		{
-			instance = this;
-		}
-
-		void OnDestroy()
-		{
-			instance = null;
+			StartCoroutine(rumor.Run());
 		}
 
 		void Update()
 		{
 			if (rumor == null || rumor.Equals(null))
 			{
-				if (!exiting)
-				{
-					StartCoroutine(Exit());
-				}
+				Exit();
 				return;
 			}
 
 			if (rumor.Finished)
 			{
-				if (!exiting)
-				{
-					StartCoroutine(Exit());
-				}
-
+				Exit();
 				return;
 			}
 
@@ -64,12 +64,29 @@ namespace Exodrifter.ChitChat
 			}
 
 			rumor.Update(Time.deltaTime);
+
+			foreach (var key in rumor.State.Dialog.Keys)
+			{
+				var str = "";
+				if (key is string && !string.IsNullOrEmpty(key as string))
+				{
+					str += string.Format("<b>{0}</b>\n", key);
+				}
+				dialog.Show(str + rumor.State.Dialog[key]);
+			}
 		}
 
-		private IEnumerator Exit()
+		public void Exit()
 		{
-			exiting = true;
+			if (!exiting)
+			{
+				exiting = true;
+				StartCoroutine(ExitInternal());
+			}
+		}
 
+		private IEnumerator ExitInternal()
+		{
 			try
 			{
 				Destroy(dialog.gameObject);
@@ -79,11 +96,10 @@ namespace Exodrifter.ChitChat
 
 				yield return new WaitForSeconds(2.1f);
 
-				Destroy(this.gameObject);
 			}
 			finally
 			{
-				SceneManager.UnloadSceneAsync(CHIT_CHAT_SCENE);
+				Destroy(gameObject);
 			}
 		}
 
@@ -160,17 +176,116 @@ namespace Exodrifter.ChitChat
 
 		#region Static
 
-		static void Start(string script, Rumor.Engine.Scope scope)
+		public static ChitChat Start(string script, Rumor.Engine.Scope scope = null)
 		{
-			if (instance == null || instance.Equals(null))
+			if (string.IsNullOrEmpty(script))
 			{
-				SceneManager.LoadScene(CHIT_CHAT_SCENE, LoadSceneMode.Additive);
-				ChitChat.instance.StartRumor(script, scope);
+				throw new System.ArgumentException("Script cannot be null or empty", "script");
 			}
-			else
-			{
-				throw new System.InvalidOperationException("Scene is already loaded!");
-			}
+			scope = scope ?? new Rumor.Engine.Scope();
+
+			var go = new GameObject("ChitChat");
+
+			go.AddComponent<RectTransform>();
+			var canvas = go.AddComponent<Canvas>();
+			canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+			var canvasScaler = go.AddComponent<CanvasScaler>();
+			canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+			canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+			canvasScaler.referenceResolution = new Vector2(800, 600);
+			canvasScaler.matchWidthOrHeight = 0.5f;
+			go.AddComponent<GraphicRaycaster>();
+			var chitchat = go.AddComponent<ChitChat>();
+
+			var compiler = new RumorCompiler();
+			var nodes = compiler.Compile(script);
+			chitchat.rumor = new Rumor.Engine.Rumor(nodes, scope);
+
+			var dialogBox = new GameObject("Dialog Box");
+			dialogBox.transform.parent = go.transform;
+			dialogBox.transform.localScale = Vector3.one;
+			var xform = dialogBox.AddComponent<RectTransform>();
+			xform.pivot = new Vector2(0.5f, 0);
+			xform.anchorMin = new Vector2(0, 0);
+			xform.anchorMax = new Vector2(1, 0);
+			xform.anchoredPosition = new Vector2(0, 0);
+			xform.sizeDelta = new Vector2(0, 200);
+			xform.localScale = Vector3.one;
+			dialogBox.AddComponent<Image>();
+			chitchat.dialog = dialogBox.AddComponent<DialogHelper>();
+
+			var dialogText = new GameObject("Text");
+			dialogText.transform.parent = dialogBox.transform;
+			dialogText.transform.localScale = Vector3.one;
+			xform = dialogText.AddComponent<RectTransform>();
+			xform.pivot = new Vector2(0.5f, 0.5f);
+			xform.anchorMin = new Vector2(0, 0);
+			xform.anchorMax = new Vector2(1, 1);
+			xform.anchoredPosition = new Vector2(0, 0);
+			xform.sizeDelta = new Vector2(-40, -40);
+			var text = dialogText.AddComponent<Text>();
+			text.fontSize = 20;
+			text.color = new Color32(50, 50, 50, 255);
+			text.supportRichText = true;
+			chitchat.dialog.Text = text;
+
+			var choice = new GameObject("Choices");
+			choice.transform.parent = go.transform;
+			choice.transform.localScale = Vector3.one;
+			xform = choice.AddComponent<RectTransform>();
+			xform.pivot = new Vector2(0.5f, 0.5f);
+			xform.anchorMin = new Vector2(0, 0);
+			xform.anchorMax = new Vector2(1, 1);
+			xform.anchoredPosition = new Vector2(0, 100);
+			xform.sizeDelta = new Vector2(-400, -200);
+			var vlayout = choice.AddComponent<VerticalLayoutGroup>();
+			vlayout.padding = new RectOffset(0, 0, 50, 50);
+			vlayout.spacing = 20;
+			vlayout.childAlignment = TextAnchor.MiddleCenter;
+			vlayout.childControlWidth = true;
+			vlayout.childControlHeight = false;
+			vlayout.childForceExpandWidth = true;
+			vlayout.childForceExpandHeight = false;
+			chitchat.choice = choice.AddComponent<ChoiceHelper>();
+
+			var prefab = new GameObject("Choice Prefab");
+			prefab.transform.parent = choice.transform;
+			prefab.transform.localScale = Vector3.one;
+			prefab.AddComponent<RectTransform>();
+			prefab.AddComponent<Image>();
+			prefab.AddComponent<Button>();
+			var hlayout = prefab.AddComponent<HorizontalLayoutGroup>();
+			hlayout.padding = new RectOffset(5, 5, 5, 5);
+			hlayout.childAlignment = TextAnchor.MiddleCenter;
+			hlayout.childControlWidth = true;
+			hlayout.childControlHeight = true;
+			hlayout.childForceExpandWidth = true;
+			hlayout.childForceExpandHeight = true;
+			var fitter = prefab.AddComponent<ContentSizeFitter>();
+			fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+			fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+			prefab.SetActive(false);
+			chitchat.choice.Prefab = prefab;
+
+			var choiceText = new GameObject("Choice Text");
+			choiceText.transform.parent = prefab.transform;
+			choiceText.transform.localScale = Vector3.one;
+			choiceText.AddComponent<RectTransform>();
+			text = choiceText.AddComponent<Text>();
+			text.fontSize = 20;
+			text.color = new Color32(50, 50, 50, 255);
+			text.alignment = TextAnchor.MiddleCenter;
+			text.horizontalOverflow = HorizontalWrapMode.Wrap;
+			text.verticalOverflow = VerticalWrapMode.Truncate;
+			text.supportRichText = true;
+
+			var audio = new GameObject("Audio");
+			audio.transform.parent = go.transform;
+			audio.transform.localScale = Vector3.one;
+			audio.transform.localPosition = Vector3.zero;
+			chitchat.audio = audio.AddComponent<AudioHelper>();
+
+			return chitchat;
 		}
 
 		#endregion

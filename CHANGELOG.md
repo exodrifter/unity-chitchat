@@ -10,3 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 * Ability to show text
 * Ability to choose between choices
 * Ability to play sounds
+
+### Changed
+* Use static instantiation method for creating a new ChitChat instead of using
+  a scene
+
