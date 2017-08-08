@@ -16,6 +16,11 @@ namespace Exodrifter.ChitChat
 		[SerializeField]
 		private Text text;
 
+		public void SetFont(Font font)
+		{
+			text.font = font;
+		}
+
 		public void Show(string text)
 		{
 			this.text.text = text;

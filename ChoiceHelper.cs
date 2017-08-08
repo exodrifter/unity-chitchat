@@ -19,6 +19,17 @@ namespace Exodrifter.ChitChat
 
 		private List<GameObject> pool = new List<GameObject>();
 
+		private Font font;
+
+		public void SetFont(Font font)
+		{
+			this.font = font;
+			foreach (var item in pool)
+			{
+				item.GetComponentInChildren<Text>().font = font;
+			}
+		}
+
 		public void Show(ChitChat chat, List<string> choices)
 		{
 			foreach (var item in pool)
@@ -33,6 +44,7 @@ namespace Exodrifter.ChitChat
 
 				var go = Instantiate(prefab);
 				go.GetComponentInChildren<Text>().text = choice;
+				go.GetComponentInChildren<Text>().font = font;
 				go.GetComponentInChildren<Button>().onClick.AddListener(
 					() => { chat.Choose(index); }
 				);

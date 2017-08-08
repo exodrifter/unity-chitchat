@@ -31,7 +31,15 @@ namespace Exodrifter.ChitChat
 		[SerializeField]
 		private new AudioHelper audio;
 
+		public Rumor.Engine.Rumor Rumor
+		{
+			get { return rumor; }
+		}
 		private Rumor.Engine.Rumor rumor;
+
+		public Font DialogFont { get; set; }
+		public Font ChoiceFont { get; set; }
+
 		private bool exiting;
 
 		void Start()
@@ -41,6 +49,9 @@ namespace Exodrifter.ChitChat
 
 		void Update()
 		{
+			dialog.SetFont(DialogFont);
+			choice.SetFont(ChoiceFont);
+
 			if (rumor == null || rumor.Equals(null))
 			{
 				Exit();
