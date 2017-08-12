@@ -16,4 +16,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 * Use static instantiation method for creating a new ChitChat instead of using
   a scene
 * Improved audio fade in and fade out
+* Default Narrator is no longer set
 

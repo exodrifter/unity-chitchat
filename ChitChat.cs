@@ -131,8 +131,6 @@ namespace Exodrifter.ChitChat
 			rumor.Bind<string, float>("stop", Stop);
 			rumor.Bind<string>("play", Play);
 			rumor.Bind<string, float, float>("play", Play);
-
-			rumor.Scope.DefaultSpeaker = "Narrator";
 		}
 
 		private void Hit(string filename)
