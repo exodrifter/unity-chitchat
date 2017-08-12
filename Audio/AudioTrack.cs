@@ -53,10 +53,10 @@ public class AudioTrack : MonoBehaviour
 		}
 	}
 
-	public void FadeIn(float seconds)
+	public void FadeIn(float seconds, float volume)
 	{
 		StopAllCoroutines();
-		StartCoroutine(FadeInternal(seconds, 1, false));
+		StartCoroutine(FadeInternal(seconds, volume, false));
 	}
 
 	public void FadeOut(float seconds)

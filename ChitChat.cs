@@ -142,7 +142,7 @@ namespace Exodrifter.ChitChat
 
 		private void Loop(string filename)
 		{
-			audio.Loop(filename, 1, 1, 1);
+			audio.Loop(filename, 0, 1, 1);
 		}
 
 		private void Loop(string filename, float fadein)

@@ -22,17 +22,17 @@ namespace Exodrifter.ChitChat
 			(string filename, float fadeIn, float volume, float pitch)
 		{
 			var track = GetTrack(filename);
-			track.volume = volume;
 			track.pitch = pitch;
 			track.loop = true;
 
 			if (track.clip == null || track.clip.Equals(null))
 			{
+				track.volume = 0;
 				track.clip = GetClip(filename);
 			}
 
 			track.Play();
-			track.FadeIn(fadeIn);
+			track.FadeIn(fadeIn, volume);
 		}
 
 		public void Stop(string filename, float fadeOut)
