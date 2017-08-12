@@ -103,7 +103,7 @@ namespace Exodrifter.ChitChat
 				Destroy(dialog.gameObject);
 				Destroy(choice.gameObject);
 
-				audio.StopLoops(2);
+				audio.Destroy(2);
 
 				yield return new WaitForSeconds(2.1f);
 
@@ -118,64 +118,62 @@ namespace Exodrifter.ChitChat
 
 		private void StartRumor(string script, Rumor.Engine.Scope scope)
 		{
-			var compiler = new Rumor.Lang.RumorCompiler();
+			var compiler = new RumorCompiler();
 			var nodes = compiler.Compile(script);
 
 			rumor = new Rumor.Engine.Rumor(nodes, scope);
 
-			rumor.Bind<string, float>("fade", Fade);
-			rumor.Bind<string, float, float, float>("fade", Fade);
 			rumor.Bind<string>("hit", Hit);
 			rumor.Bind<string>("loop", Loop);
-			rumor.Bind<string, float, float>("loop", Loop);
+			rumor.Bind<string, float>("loop", Loop);
+			rumor.Bind<string, float, float, float>("loop", Loop);
+			rumor.Bind<string>("stop", Stop);
+			rumor.Bind<string, float>("stop", Stop);
 			rumor.Bind<string>("play", Play);
 			rumor.Bind<string, float, float>("play", Play);
 
 			rumor.Scope.DefaultSpeaker = "Narrator";
-
-			StartCoroutine(rumor.Run());
-		}
-
-		private void Fade(string filename, float fadeInTime)
-		{
-			var clip = Resources.Load<AudioClip>(filename);
-			audio.Loop(clip, fadeInTime, 1, 1);
-		}
-
-		private void Fade(string filename, float fadeInTime, float volume, float pitch)
-		{
-			var clip = Resources.Load<AudioClip>(filename);
-			audio.Loop(clip, fadeInTime, volume, pitch);
 		}
 
 		private void Hit(string filename)
 		{
-			var clip = Resources.Load<AudioClip>(filename);
-			audio.Play(clip, Random.Range(0.8f, 1f), Random.Range(0.8f, 1.2f));
+			audio.Play(filename, Random.Range(0.8f, 1f), Random.Range(0.8f, 1.2f));
 		}
 
 		private void Loop(string filename)
 		{
-			var clip = Resources.Load<AudioClip>(filename);
-			audio.Loop(clip, 1, 1);
+			audio.Loop(filename, 1, 1, 1);
 		}
 
-		private void Loop(string filename, float volume, float pitch)
+		private void Loop(string filename, float fadein)
 		{
-			var clip = Resources.Load<AudioClip>(filename);
-			audio.Loop(clip, volume, pitch);
+			audio.Loop(filename, fadein, 1, 1);
+		}
+
+		private void Loop
+			(string filename, float fadein, float volume, float pitch)
+		{
+			audio.Loop(filename, fadein, volume, pitch);
+		}
+
+		private void Stop(string filename)
+		{
+			audio.Stop(filename, 0);
+		}
+
+		private void Stop(string filename, float fadeOut)
+		{
+			audio.Stop(filename, fadeOut);
 		}
 
 		private void Play(string filename)
 		{
-			var clip = Resources.Load<AudioClip>(filename);
-			audio.Play(clip, 1, 1);
+			audio.Play(filename, 1, 1);
 		}
 
 		private void Play(string filename, float volume, float pitch)
 		{
-			var clip = Resources.Load<AudioClip>(filename);
-			audio.Play(clip, volume, pitch);
+			audio.Play(filename, volume, pitch);
 		}
 
 		internal void Choose(int index)
@@ -207,10 +205,6 @@ namespace Exodrifter.ChitChat
 			canvasScaler.matchWidthOrHeight = 0.5f;
 			go.AddComponent<GraphicRaycaster>();
 			var chitchat = go.AddComponent<ChitChat>();
-
-			var compiler = new RumorCompiler();
-			var nodes = compiler.Compile(script);
-			chitchat.rumor = new Rumor.Engine.Rumor(nodes, scope);
 
 			var dialogBox = new GameObject("Dialog Box");
 			dialogBox.transform.parent = go.transform;
@@ -296,6 +290,7 @@ namespace Exodrifter.ChitChat
 			audio.transform.localPosition = Vector3.zero;
 			chitchat.audio = audio.AddComponent<AudioHelper>();
 
+			chitchat.StartRumor(script, scope);
 			return chitchat;
 		}
 
