@@ -1,29 +1,28 @@
-﻿using System.Collections;
+﻿using Exodrifter.Anchor;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Exodrifter.Rumor.Util;
 
 namespace Exodrifter.ChitChat
 {
-	[AddComponentMenu("")]
+	[AddComponentMenu("Chit Chat/Dialog Helper")]
 	public class DialogHelper : MonoBehaviour
 	{
-		public Text Text
-		{
-			get { return text; }
-			set { text = value; }
-		}
 		[SerializeField]
-		private Text text;
+		private Pool pool;
 
-		public void SetFont(Font font)
+		public void Show(LazyDictionary<object, string> dialog)
 		{
-			text.font = font;
-		}
+			pool.DespawnAll();
 
-		public void Show(string text)
-		{
-			this.text.text = text;
+			foreach (var key in dialog.Keys)
+			{
+				var i = pool.Spawn<DialogItem>();
+				i.NameTag = key == null ? "" : key.ToString();
+				i.Dialog = dialog[key];
+			}
 		}
 	}
 }

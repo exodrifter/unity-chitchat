@@ -1,6 +1,6 @@
 [submodule "Rumor"]
 	path = Rumor
-	url = https://github.com/exodrifter/unity-rumor.git
+	url = git@github.com:exodrifter/unity-rumor.git
 [submodule "Anchor"]
 	path = Anchor
 	url = git@github.com:exodrifter/unity-anchor.git

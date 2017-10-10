@@ -2,7 +2,7 @@
 
 namespace Exodrifter.ChitChat
 {
-	[AddComponentMenu("")]
+	[AddComponentMenu("Chit Chat/Audio Helper")]
 	public class AudioHelper : MonoBehaviour
 	{
 		public void Play(string filename, float volume, float pitch)
@@ -72,7 +72,7 @@ namespace Exodrifter.ChitChat
 			return Resources.Load<AudioClip>(filename);
 		}
 
-		public void Destroy(float fadeOut)
+		public void Stop(float fadeOut)
 		{
 			var length = transform.childCount;
 			for (int i = 0; i < length; ++i)
@@ -85,8 +85,6 @@ namespace Exodrifter.ChitChat
 					track.FadeOut(fadeOut);
 				}
 			}
-
-			Destroy(gameObject, fadeOut + 0.1f);
 		}
 	}
 }
